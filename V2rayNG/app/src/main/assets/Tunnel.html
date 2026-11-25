@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tunnel</title>
+<style>
+:root{--bg:#f3f1fa;--card:#fff;--ink:#1b1740;--mut:#6b6890;--line:#dedaf0;--acc:#f2a900;--accink:#2a1d00;--ok:#1a9b5c;--err:#d6453d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14112b;--card:#1e1a3d;--ink:#eeebff;--mut:#9a96c4;--line:#322d63;--ok:#38d08a;--err:#ff7a70}}
+:root[data-theme="dark"]{--bg:#14112b;--card:#1e1a3d;--ink:#eeebff;--mut:#9a96c4;--line:#322d63;--ok:#38d08a;--err:#ff7a70}
+html{color-scheme:light dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 2px}
+.sub{color:var(--mut);margin:0 0 20px;font-size:14px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px 20px;text-align:center}
+.btn{width:132px;height:132px;border-radius:50%;border:0;background:var(--acc);color:var(--accink);font:700 18px system-ui,sans-serif;cursor:pointer;box-shadow:0 0 0 10px color-mix(in srgb,var(--acc) 22%,transparent);transition:transform .15s,box-shadow .3s}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.on .btn{background:var(--ok);color:#fff;box-shadow:0 0 0 10px color-mix(in srgb,var(--ok) 25%,transparent)}
+.st{margin:18px 0 2px;font-weight:600}
+.srv{color:var(--mut);font-size:14px;word-break:break-all}
+.time{font:600 28px ui-monospace,Menlo,monospace;margin-top:8px;min-height:36px}
+.msg{margin:12px 0 0;font-size:14px;color:var(--mut)}
+.msg.err{color:var(--err)}
+h2{font-size:16px;margin:26px 0 8px}
+textarea{width:100%;min-height:84px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px;font:14px ui-monospace,Menlo,monospace;resize:vertical}
+.add{margin-top:8px;width:100%;padding:12px;border-radius:12px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:600 15px system-ui,sans-serif;cursor:pointer}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+li.sel{border-color:var(--acc);border-width:2px;padding:9px 11px}
+.pick{flex:1;text-align:left;background:none;border:0;color:var(--ink);cursor:pointer;padding:2px 0;font:inherit;min-width:0}
+.pick b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick span{font-size:13px;color:var(--mut)}
+.del{border:0;background:none;color:var(--err);font-size:20px;cursor:pointer;padding:6px 10px}
+.empty{color:var(--mut);font-size:14px;padding:6px 2px}
+[hidden]{display:none!important}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 14px system-ui,sans-serif;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.fs{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px;display:grid;gap:10px}
+.fs h3{margin:0;font-size:15px}
+.f{display:grid;gap:4px;font-size:13px;color:var(--mut)}
+.f input,.f select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:15px system-ui,sans-serif}
+.f small{font-size:12px}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px}
+.sw input{width:22px;height:22px;accent-color:var(--acc)}
+.row{display:flex;gap:8px;margin-top:12px}
+.row .add{margin:0}
+.row .pri{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+</style>
+</head>
+<body>
+<main id="app">
+  <h1>Tunnel</h1>
+  <p class="sub">Tempel link akun V2Ray, pilih server, lalu sambungkan.</p>
+
+  <section class="hero" id="hero">
+    <button class="btn" id="btn" type="button">Sambung</button>
+    <div class="st" id="st">Terputus</div>
+    <div class="srv" id="cur">Belum ada server dipilih</div>
+    <div class="time" id="time"></div>
+    <p class="msg" id="msg"></p>
+  </section>
+
+  <h2>Impor dari link</h2>
+  <textarea id="inp" placeholder="vmess://… atau vless://… atau trojan://…" spellcheck="false" autocapitalize="off"></textarea>
+  <button class="add" id="add" type="button">Impor link</button>
+
+  <h2>Editor profil</h2>
+  <label class="f">Nama profil<input id="f_name" autocomplete="off"></label>
+
+  <div class="fs">
+    <h3>Metode</h3>
+    <div class="chips">
+      <button type="button" class="chip" id="c_payload" aria-pressed="false">Payload</button>
+      <button type="button" class="chip" id="c_tls" aria-pressed="false">TLS</button>
+      <button type="button" class="chip" id="c_slowdns" aria-pressed="false">SlowDNS</button>
+    </div>
+    <label class="f" id="box_payload" hidden>Payload<textarea id="f_payload" spellcheck="false" placeholder="GET / HTTP/1.1[crlf]Host: bug.host[crlf][crlf]"></textarea></label>
+    <div id="box_slowdns" hidden class="fs" style="margin:0">
+      <label class="f">Nameserver SlowDNS<input id="f_dns" autocapitalize="off" spellcheck="false"></label>
+      <label class="f">Public key<input id="f_pub" autocapitalize="off" spellcheck="false"></label>
+    </div>
+  </div>
+
+  <div class="fs">
+    <h3>Server</h3>
+    <label class="f">Protokol<select id="f_proto"><option value="vmess">VMess</option><option value="vless">VLESS</option><option value="trojan">Trojan</option></select></label>
+    <label class="f">Alamat server:port<input id="f_addr" autocapitalize="off" spellcheck="false" placeholder="bug.host.com:443"><small>Contoh v2ray.example.com:443 atau [2001:db8::1]:443</small></label>
+  </div>
+
+  <div class="fs">
+    <h3>Akun</h3>
+    <label class="f">UUID atau password<input id="f_id" autocapitalize="off" spellcheck="false"></label>
+    <label class="f">Keamanan<select id="f_sec"><option>auto</option><option>aes-128-gcm</option><option>chacha20-poly1305</option><option>none</option><option>zero</option></select></label>
+  </div>
+
+  <div class="fs">
+    <h3>Transport</h3>
+    <label class="f">Jenis<select id="f_net"><option value="ws">WebSocket</option><option value="tcp">TCP</option><option value="grpc">gRPC</option><option value="h2">HTTP/2</option></select></label>
+    <label class="f">Path<input id="f_path" autocapitalize="off" spellcheck="false" placeholder="/vmess"><small>Kosong = /</small></label>
+    <label class="f">Header Host (bug host)<input id="f_wshost" autocapitalize="off" spellcheck="false"><small>Kosong = memakai SNI atau alamat server</small></label>
+  </div>
+
+  <div class="fs">
+    <h3>Keamanan</h3>
+    <label class="sw">Aktifkan keamanan (TLS)<input type="checkbox" id="f_tlson"></label>
+    <div id="box_tls" hidden style="display:grid;gap:10px">
+      <label class="f">SNI (bug)<input id="f_sni" autocapitalize="off" spellcheck="false"></label>
+      <label class="f">Fingerprint uTLS<select id="f_fp"><option value="">None</option><option>chrome</option><option>firefox</option><option>safari</option><option>ios</option><option>android</option><option>random</option></select></label>
+      <label class="f">ALPN<input id="f_alpn" autocapitalize="off" spellcheck="false"><small>Kosong = h2, http/1.1</small></label>
+      <label class="sw">Izinkan koneksi tidak aman<input type="checkbox" id="f_insecure"></label>
+      <label class="f">Daftar konfigurasi ECH<input id="f_ech" autocapitalize="off" spellcheck="false"><small>Opsional, isi bila diberikan penyedia</small></label>
+      <label class="f">Sertifikat ter-pin (SHA-256)<input id="f_pin" autocapitalize="off" spellcheck="false"><small>Opsional, isi bila diberikan penyedia</small></label>
+    </div>
+  </div>
+
+  <div class="fs">
+    <h3>Mux</h3>
+    <label class="sw">Aktifkan Mux<input type="checkbox" id="f_mux"></label>
+  </div>
+
+  <div class="row">
+    <button class="add pri" id="saveP" type="button">Simpan profil</button>
+    <button class="add" id="newP" type="button">Profil baru</button>
+  </div>
+
+  <h2>Server tersimpan</h2>
+  <ul id="list"></ul>
+</main>
+
+<script>
+(function(){
+  var KEY="tunnel.servers.v1", servers=[], sel=-1, editing=-1, state="off", t0=0, tick=null;
+  var $=function(i){return document.getElementById(i)};
+
+  function load(){try{var r=JSON.parse(localStorage.getItem(KEY)||"{}");servers=r.s||[];sel=typeof r.i==="number"?r.i:-1}catch(e){servers=[];sel=-1}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({s:servers,i:sel}))}catch(e){}}
+
+  function b64d(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return decodeURIComponent(escape(atob(s)))}
+
+  function parse(link){
+    link=link.trim();
+    if(/^vmess:\/\//i.test(link)){
+      var j=JSON.parse(b64d(link.slice(8)));
+      return {proto:"vmess",name:j.ps||j.add,host:j.add,port:+j.port,id:j.id,aid:+(j.aid||0),net:j.net||"tcp",tls:j.tls==="tls",sni:j.sni||j.host||"",wshost:j.host||"",path:j.path||"/"};
+    }
+    var m=/^(vless|trojan):\/\//i.exec(link);
+    if(m){
+      var u=new URL(link), q=u.searchParams;
+      return {proto:m[1].toLowerCase(),name:decodeURIComponent(u.hash.slice(1))||u.hostname,host:u.hostname,port:+u.port||443,id:decodeURIComponent(u.username),net:q.get("type")||"tcp",tls:(q.get("security")||"")==="tls",sni:q.get("sni")||q.get("host")||"",wshost:q.get("host")||"",path:q.get("path")||"/"};
+    }
+    throw new Error("Format belum didukung. Pakai vmess://, vless:// atau trojan://");
+  }
+
+  function say(t,err){var m=$("msg");m.textContent=t||"";m.className="msg"+(err?" err":"")}
+
+  function render(){
+    var ul=$("list");ul.innerHTML="";
+    if(!servers.length){var e=document.createElement("li");e.className="empty";e.style.border="0";e.style.background="none";e.textContent="Belum ada akun. Tempel link di atas.";ul.appendChild(e)}
+    servers.forEach(function(s,i){
+      var li=document.createElement("li");if(i===sel)li.className="sel";
+      var p=document.createElement("button");p.type="button";p.className="pick";
+      var b=document.createElement("b");b.textContent=s.name;
+      var sp=document.createElement("span");sp.textContent=s.proto+" · "+s.net+(s.tls?" · tls":"")+" · "+s.host+":"+s.port;
+      p.appendChild(b);p.appendChild(sp);
+      p.onclick=function(){if(state!=="off")return say("Putuskan dulu sebelum ganti server.",true);sel=i;editing=i;fillForm(servers[i]);save();render();say("")};
+      var d=document.createElement("button");d.type="button";d.className="del";d.setAttribute("aria-label","Hapus "+s.name);d.textContent="×";
+      d.onclick=function(){if(state!=="off")return say("Putuskan dulu sebelum menghapus.",true);servers.splice(i,1);if(sel>=servers.length)sel=servers.length-1;save();render()};
+      li.appendChild(p);li.appendChild(d);ul.appendChild(li);
+    });
+    $("cur").textContent=sel>=0&&servers[sel]?servers[sel].name:"Belum ada server dipilih";
+  }
+
+  function setState(s){
+    state=s;
+    var h=$("hero"),b=$("btn"),st=$("st");
+    h.className="hero"+(s==="on"?" on":"");
+    b.textContent=s==="on"?"Putus":s==="wait"?"…":"Sambung";
+    st.textContent=s==="on"?"Tersambung":s==="wait"?"Menyambung":"Terputus";
+    clearInterval(tick);$("time").textContent="";
+    if(s==="on"){t0=Date.now();tick=setInterval(function(){var x=Math.floor((Date.now()-t0)/1000),p=function(n){return(n<10?"0":"")+n};$("time").textContent=p(Math.floor(x/3600))+":"+p(Math.floor(x%3600/60))+":"+p(x%60)},1000)}
+  }
+
+  // Jembatan ke core native. Aplikasi Android memanggil window.onTunnelState("on"|"off"|"error", "pesan")
+  window.onTunnelState=function(s,m){
+    if(s==="error"){setState("off");say(m||"Gagal menyambung.",true)}
+    else{setState(s==="on"?"on":"off");say(m||"")}
+  };
+
+  $("add").onclick=function(){
+    var v=$("inp").value.trim();
+    if(!v)return say("Tempel link akun dulu.",true);
+    try{
+      var lines=v.split(/\s+/),n=0;
+      lines.forEach(function(l){if(l){servers.push(parse(l));n++}});
+      sel=servers.length-1;editing=sel;fillForm(servers[sel]);save();render();$("inp").value="";say(n+" akun disimpan.")
+    }catch(e){say(e.message||"Link tidak valid.",true)}
+  };
+
+  /* ---- Editor profil ---- */
+  function g(i){return $("f_"+i)}
+  function chip(k,on){
+    var c=$("c_"+k);c.classList.toggle("on",on);c.setAttribute("aria-pressed",on?"true":"false");
+    if(k==="payload")$("box_payload").hidden=!on;
+    if(k==="slowdns")$("box_slowdns").hidden=!on;
+    if(k==="tls"){g("tlson").checked=on;$("box_tls").hidden=!on}
+  }
+  ["payload","tls","slowdns"].forEach(function(k){$("c_"+k).onclick=function(){chip(k,!this.classList.contains("on"))}});
+  g("tlson").onchange=function(){chip("tls",this.checked)};
+
+  function fillForm(s){
+    s=s||{};
+    var h=s.host||"",a=h?((h.indexOf(":")>-1?"["+h+"]":h)+":"+(s.port||443)):"";
+    g("name").value=s.name||"";g("proto").value=s.proto||"vmess";g("addr").value=a;
+    g("id").value=s.id||"";g("sec").value=s.sec||"auto";
+    g("net").value=s.net||"ws";g("path").value=s.path||"";g("wshost").value=s.wshost||"";
+    g("sni").value=s.sni||"";g("fp").value=s.fp||"";g("alpn").value=s.alpn||"";
+    g("insecure").checked=!!s.insecure;g("ech").value=s.ech||"";g("pin").value=s.pin||"";
+    g("mux").checked=!!s.mux;g("payload").value=s.payload||"";g("dns").value=s.dns||"";g("pub").value=s.pub||"";
+    chip("payload",!!s.payload);chip("slowdns",!!(s.dns||s.pub));chip("tls",!!s.tls);
+  }
+
+  function readForm(){
+    var m=/^(.*):(\d{1,5})$/.exec(g("addr").value.trim());
+    if(!m||!m[1])throw new Error("Alamat server harus host:port, contoh v2ray.example.com:443");
+    if(!g("id").value.trim())throw new Error("UUID atau password wajib diisi.");
+    var host=m[1].replace(/^\[|\]$/g,""),on=function(k){return $("c_"+k).classList.contains("on")};
+    return {proto:g("proto").value,name:g("name").value.trim()||host,host:host,port:+m[2],id:g("id").value.trim(),sec:g("sec").value,
+      net:g("net").value,path:g("path").value.trim()||"/",wshost:g("wshost").value.trim(),
+      tls:g("tlson").checked,sni:g("sni").value.trim(),fp:g("fp").value,alpn:g("alpn").value.trim(),
+      insecure:g("insecure").checked,ech:g("ech").value.trim(),pin:g("pin").value.trim(),mux:g("mux").checked,
+      payload:on("payload")?g("payload").value:"",dns:on("slowdns")?g("dns").value.trim():"",pub:on("slowdns")?g("pub").value.trim():""};
+  }
+
+  $("saveP").onclick=function(){
+    if(state!=="off")return say("Putuskan dulu sebelum menyimpan profil.",true);
+    try{
+      var o=readForm();
+      if(editing>=0&&servers[editing])servers[editing]=o;else{servers.push(o);editing=servers.length-1}
+      sel=editing;save();render();say("Profil disimpan.")
+    }catch(e){say(e.message,true)}
+  };
+  $("newP").onclick=function(){editing=-1;fillForm({});say("Isi form lalu simpan profil.")};
+
+  $("btn").onclick=function(){
+    if(state==="on"||state==="wait"){
+      if(window.Android&&Android.disconnect)Android.disconnect();
+      return setState("off");
+    }
+    if(sel<0||!servers[sel])return say("Pilih atau tambah server dulu.",true);
+    if(!(window.Android&&Android.connect)){
+      return say("Halaman ini baru tampilan. Tombol baru bisa menyambung setelah dibungkus jadi APK dengan core V2Ray (VpnService).",true);
+    }
+    setState("wait");say("");
+    Android.connect(JSON.stringify(servers[sel]));
+  };
+
+  load();render();setState("off");
+  if(sel>=0&&servers[sel]){editing=sel;fillForm(servers[sel])}else fillForm({});
+})();
+</script>
+</body>
+</html>
