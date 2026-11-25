@@ -73,6 +73,13 @@ jobs:
         fileName: 'libv2ray.aar'
         out-file-path: V2rayNG/app/libs/
 
+    - name: Download geoip and geosite
+      run: |
+        mkdir -p ${{ github.workspace }}/V2rayNG/app/src/main/assets
+        curl -fL --retry 3 -o ${{ github.workspace }}/V2rayNG/app/src/main/assets/geoip.dat https://github.com/v2fly/geoip/releases/latest/download/geoip.dat
+        curl -fL --retry 3 -o ${{ github.workspace }}/V2rayNG/app/src/main/assets/geosite.dat https://github.com/v2fly/domain-list-community/releases/latest/download/dlc.dat
+        ls -la ${{ github.workspace }}/V2rayNG/app/src/main/assets
+
     - name: Setup Java
       uses: actions/setup-java@v6.3.0
       with:
@@ -91,5 +98,5 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: tunnel-apk
-        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/fdroid/debug/*.apk
+        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/fdroid/debug/*arm64-v8a*.apk
         if-no-files-found: error
